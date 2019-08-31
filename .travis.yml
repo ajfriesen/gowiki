@@ -1,0 +1,13 @@
+language: go
+
+go: 1.9.3
+
+sudo: false
+
+script:
+  - go vet ./...
+  - go test ./...
+
+branches:
+  only:
+    - master
