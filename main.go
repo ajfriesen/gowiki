@@ -37,7 +37,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
 		return
 	}
-	renderTemplate(w, "view", p)
+	renderTemplate(w, "base", p)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -59,10 +59,10 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-var templates = template.Must(template.ParseFiles("edit.html", "view.html"))
+var templates = template.Must(template.ParseFiles("template/navbar.html", "template/edit.html", "template/view.html", "template/base.html"))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", p)
+	err := templates.ExecuteTemplate(w, tmpl, p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -82,6 +82,10 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 }
 
 func main() {
+
+	fileserver := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fileserver))
+
 	http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
